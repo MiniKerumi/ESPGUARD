@@ -1,14 +1,16 @@
 import { useEffect } from "react";
-import { Bluetooth, BluetoothOff, Bell, BellOff } from "lucide-react";
+import { Bluetooth, BluetoothOff, BellOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusIndicator } from "@/components/StatusIndicator";
 import { ActivityLog } from "@/components/ActivityLog";
+import { HardwareConfig } from "@/components/HardwareConfig";
 import { useBluetooth } from "@/hooks/useBluetooth";
 import { useAlarm } from "@/hooks/useAlarm";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { isConnected, currentState, logs, isScanning, connect, disconnect } = useBluetooth();
+  const { isConnected, currentState, logs, isScanning, sensorStatus, connect, disconnect } = useBluetooth();
   const { isPlaying, triggerAlarm, stopAlarm, requestPermissions } = useAlarm();
   const { toast } = useToast();
 
@@ -20,7 +22,7 @@ const Index = () => {
     if (currentState === 'ALARM') {
       triggerAlarm();
       toast({
-        title: "ALARM!",
+        title: "⚠ ALARM!",
         description: "Motion detected by IR sensor",
         variant: "destructive",
       });
@@ -86,8 +88,19 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Activity Log */}
-        <ActivityLog logs={logs} />
+        {/* Tabs: Monitor / Hardware */}
+        <Tabs defaultValue="monitor" className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="monitor" className="flex-1">Monitor</TabsTrigger>
+            <TabsTrigger value="hardware" className="flex-1">Hardware</TabsTrigger>
+          </TabsList>
+          <TabsContent value="monitor">
+            <ActivityLog logs={logs} />
+          </TabsContent>
+          <TabsContent value="hardware">
+            <HardwareConfig sensorStatus={sensorStatus} isConnected={isConnected} />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

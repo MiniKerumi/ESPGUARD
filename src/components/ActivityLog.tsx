@@ -20,6 +20,17 @@ export const ActivityLog = ({ logs }: ActivityLogProps) => {
     }
   };
 
+  const getSeverityBg = (severity?: string) => {
+    switch (severity) {
+      case 'critical':
+        return 'bg-status-motion/10 border-l-2 border-l-status-motion';
+      case 'warning':
+        return 'bg-status-service/10 border-l-2 border-l-status-service';
+      default:
+        return 'bg-secondary/50';
+    }
+  };
+
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <h3 className="mb-4 text-lg font-semibold">Activity Log</h3>
@@ -31,7 +42,7 @@ export const ActivityLog = ({ logs }: ActivityLogProps) => {
             logs.map((log, index) => (
               <div
                 key={index}
-                className="rounded-lg bg-secondary/50 p-3 text-sm"
+                className={cn("rounded-lg p-3 text-sm", getSeverityBg(log.severity))}
               >
                 <div className="flex items-start justify-between gap-2">
                   <span className={cn("font-medium", getStateColor(log.state))}>

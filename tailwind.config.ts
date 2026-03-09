@@ -85,6 +85,10 @@ export default {
             height: "0",
           },
         },
+        "alarm-pulse": {
+          "0%, 100%": { opacity: "1", boxShadow: "0 0 0 0 hsl(var(--status-motion) / 0.4)" },
+          "50%": { opacity: "0.85", boxShadow: "0 0 20px 8px hsl(var(--status-motion) / 0.15)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
