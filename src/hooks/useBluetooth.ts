@@ -1,5 +1,5 @@
-import { useState, useCallback, useEffect } from 'react';
-import { BleClient, numbersToDataView, numberToUUID } from '@capacitor-community/bluetooth-le';
+import { useState, useCallback, useRef } from 'react';
+import { BleClient } from '@capacitor-community/bluetooth-le';
 
 const TARGET_NAME = 'ESP32-Security-TX';
 const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
@@ -11,6 +11,12 @@ export interface LogEntry {
   timestamp: Date;
   message: string;
   state?: SystemState;
+  severity?: 'info' | 'warning' | 'critical';
+}
+
+export interface SensorStatus {
+  nfcActive: boolean;
+  irActive: boolean;
 }
 
 export const useBluetooth = () => {
@@ -19,27 +25,57 @@ export const useBluetooth = () => {
   const [currentState, setCurrentState] = useState<SystemState>('UNKNOWN');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isScanning, setIsScanning] = useState(false);
+  const [sensorStatus, setSensorStatus] = useState<SensorStatus>({ nfcActive: false, irActive: false });
+  const previousStateRef = useRef<SystemState>('UNKNOWN');
 
-  const addLog = useCallback((message: string, state?: SystemState) => {
+  const addLog = useCallback((message: string, state?: SystemState, severity: 'info' | 'warning' | 'critical' = 'info') => {
     setLogs(prev => [{
       timestamp: new Date(),
       message,
-      state
-    }, ...prev].slice(0, 50)); // Keep last 50 entries
+      state,
+      severity
+    }, ...prev].slice(0, 50));
   }, []);
 
   const handleNotification = useCallback((value: DataView) => {
     const decoder = new TextDecoder();
     const stateText = decoder.decode(value).trim();
-    
-    console.log('Received notification:', stateText);
-    
+    const prevState = previousStateRef.current;
+
     if (stateText === 'NORMAL' || stateText === 'MAINT' || stateText === 'ALARM') {
-      setCurrentState(stateText as SystemState);
-      addLog(`State: ${stateText}`, stateText as SystemState);
+      const newState = stateText as SystemState;
+      
+      // Infer sensor activity from state transitions
+      if (newState === 'MAINT' && prevState !== 'MAINT') {
+        setSensorStatus(prev => ({ ...prev, nfcActive: true }));
+        addLog('NFC: Authorized tag scanned → Maintenance ON', 'MAINT', 'warning');
+        setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
+      } else if (prevState === 'MAINT' && newState === 'NORMAL') {
+        setSensorStatus(prev => ({ ...prev, nfcActive: true }));
+        addLog('NFC: Authorized tag scanned → Maintenance OFF', 'NORMAL', 'info');
+        setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
+      }
+
+      if (newState === 'ALARM') {
+        setSensorStatus(prev => ({ ...prev, irActive: true }));
+        if (prevState !== 'ALARM') {
+          addLog('⚠ ALARM: Motion detected by IR sensor!', 'ALARM', 'critical');
+        }
+      } else {
+        setSensorStatus(prev => ({ ...prev, irActive: false }));
+      }
+
+      // Only log generic state if no specific log was added above
+      if (newState === prevState) {
+        // Same state, no log needed
+      } else if (newState === 'NORMAL' && prevState === 'ALARM') {
+        addLog('System returned to NORMAL', 'NORMAL', 'info');
+      }
+
+      setCurrentState(newState);
+      previousStateRef.current = newState;
     } else {
-      console.warn('Unknown state received:', stateText);
-      addLog(`Unknown state: ${stateText}`);
+      addLog(`Unknown data: ${stateText}`);
     }
   }, [addLog]);
 
@@ -57,20 +93,15 @@ export const useBluetooth = () => {
       if (device) {
         setDeviceAddress(device.deviceId);
         addLog(`Found device: ${device.name}`);
-        
+
         await BleClient.connect(device.deviceId, () => {
           setIsConnected(false);
-          addLog('Device disconnected');
-          // Auto-reconnect after 5 seconds
-          setTimeout(() => {
-            if (deviceAddress) {
-              reconnect();
-            }
-          }, 5000);
+          setSensorStatus({ nfcActive: false, irActive: false });
+          addLog('Device disconnected', undefined, 'warning');
         });
 
         setIsConnected(true);
-        addLog('Connected successfully');
+        addLog('Connected successfully', undefined, 'info');
 
         await BleClient.startNotifications(
           device.deviceId,
@@ -84,40 +115,10 @@ export const useBluetooth = () => {
       }
     } catch (error) {
       console.error('Connection error:', error);
-      addLog(`Error: ${error instanceof Error ? error.message : 'Failed to connect'}`);
+      addLog(`Error: ${error instanceof Error ? error.message : 'Failed to connect'}`, undefined, 'critical');
       setIsScanning(false);
     }
-  }, [addLog, handleNotification, deviceAddress]);
-
-  const reconnect = useCallback(async () => {
-    if (!deviceAddress) {
-      await connect();
-      return;
-    }
-
-    try {
-      addLog('Attempting to reconnect...');
-      await BleClient.connect(deviceAddress, () => {
-        setIsConnected(false);
-        addLog('Device disconnected');
-      });
-
-      setIsConnected(true);
-      addLog('Reconnected successfully');
-
-      await BleClient.startNotifications(
-        deviceAddress,
-        SERVICE_UUID,
-        CHAR_UUID,
-        handleNotification
-      );
-    } catch (error) {
-      console.error('Reconnection error:', error);
-      addLog(`Reconnection failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
-      // Try full connection scan instead
-      setTimeout(() => connect(), 5000);
-    }
-  }, [deviceAddress, connect, addLog, handleNotification]);
+  }, [addLog, handleNotification]);
 
   const disconnect = useCallback(async () => {
     if (deviceAddress) {
@@ -125,6 +126,9 @@ export const useBluetooth = () => {
         await BleClient.disconnect(deviceAddress);
         setIsConnected(false);
         setDeviceAddress('');
+        setSensorStatus({ nfcActive: false, irActive: false });
+        setCurrentState('UNKNOWN');
+        previousStateRef.current = 'UNKNOWN';
         addLog('Disconnected by user');
       } catch (error) {
         console.error('Disconnect error:', error);
@@ -137,8 +141,8 @@ export const useBluetooth = () => {
     currentState,
     logs,
     isScanning,
+    sensorStatus,
     connect,
     disconnect,
-    reconnect
   };
 };
