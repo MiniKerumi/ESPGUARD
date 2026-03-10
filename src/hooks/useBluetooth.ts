@@ -1,9 +1,9 @@
 import { useState, useCallback, useRef } from 'react';
 import { BleClient } from '@capacitor-community/bluetooth-le';
 
-const TARGET_NAME = 'ESP32-Security-TX';
-const SERVICE_UUID = '4fafc201-1fb5-459e-8fcc-c5c9c331914b';
-const CHAR_UUID = 'beb5483e-36e1-4688-b7f5-ea07361b26a8';
+const TARGET_NAME = 'ESPGUARD-Server';
+const SERVICE_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
+const CHAR_UUID = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E';
 
 export type SystemState = 'NORMAL' | 'MAINT' | 'ALARM' | 'UNKNOWN';
 
