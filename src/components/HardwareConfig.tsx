@@ -14,7 +14,7 @@ interface HardwareConfigProps {
 
 const pinData = [
   { component: "MFRC522 (NFC)", pin: "SDA/SS", gpio: "GPIO 5" },
-  { component: "MFRC522 (NFC)", pin: "RST", gpio: "GPIO 10" },
+  { component: "MFRC522 (NFC)", pin: "RST", gpio: "GPIO 6" },
   { component: "MFRC522 (NFC)", pin: "SCK", gpio: "GPIO 2" },
   { component: "MFRC522 (NFC)", pin: "MOSI", gpio: "GPIO 3" },
   { component: "MFRC522 (NFC)", pin: "MISO", gpio: "GPIO 4" },
