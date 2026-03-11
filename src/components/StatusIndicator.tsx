@@ -66,7 +66,7 @@ export const StatusIndicator = ({ state, isConnected }: StatusIndicatorProps) =>
         </h2>
         {state === 'MAINT' && (
           <p className="text-sm text-status-service/80">
-            IR sensor disabled · Scan authorized tag to exit
+            Ultrasonic sensor disabled · Scan authorized tag to exit
           </p>
         )}
         {state === 'ALARM' && (
