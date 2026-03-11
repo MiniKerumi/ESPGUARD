@@ -1,4 +1,4 @@
-import { Cpu, Radio, Eye } from "lucide-react";
+import { Cpu, Radio, Waves } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 
@@ -18,7 +18,8 @@ const pinData = [
   { component: "MFRC522 (NFC)", pin: "SCK", gpio: "GPIO 2" },
   { component: "MFRC522 (NFC)", pin: "MOSI", gpio: "GPIO 3" },
   { component: "MFRC522 (NFC)", pin: "MISO", gpio: "GPIO 4" },
-  { component: "HW-201 (IR)", pin: "Signal OUT", gpio: "GPIO 8" },
+  { component: "HC-SR04 (Ultrasonic)", pin: "TRIG", gpio: "GPIO 8" },
+  { component: "HC-SR04 (Ultrasonic)", pin: "ECHO", gpio: "GPIO 9" },
 ];
 
 export const HardwareConfig = ({ sensorStatus, isConnected }: HardwareConfigProps) => {
