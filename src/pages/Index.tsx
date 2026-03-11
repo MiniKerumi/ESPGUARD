@@ -39,7 +39,7 @@ const Index = () => {
         </div>
 
         {/* Status Display */}
-        <StatusIndicator state={currentState} />
+        <StatusIndicator state={currentState} isConnected={isConnected} />
 
         {/* Connection Controls */}
         <div className="flex gap-4">
