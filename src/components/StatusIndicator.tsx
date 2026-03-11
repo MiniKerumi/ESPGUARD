@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 
 interface StatusIndicatorProps {
   state: SystemState;
+  isConnected: boolean;
 }
 
 export const StatusIndicator = ({ state }: StatusIndicatorProps) => {
