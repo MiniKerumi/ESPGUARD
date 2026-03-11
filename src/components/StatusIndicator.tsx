@@ -7,7 +7,7 @@ interface StatusIndicatorProps {
   isConnected: boolean;
 }
 
-export const StatusIndicator = ({ state }: StatusIndicatorProps) => {
+export const StatusIndicator = ({ state, isConnected }: StatusIndicatorProps) => {
   const getStateConfig = () => {
     switch (state) {
       case 'NORMAL':
@@ -31,7 +31,7 @@ export const StatusIndicator = ({ state }: StatusIndicatorProps) => {
       case 'ALARM':
         return {
           icon: AlertTriangle,
-          text: 'ALARM — Motion Detected!',
+          text: 'ALARM — Object Detected!',
           color: 'text-status-motion',
           bgColor: 'bg-status-motion/20',
           borderColor: 'border-status-motion',
@@ -40,10 +40,10 @@ export const StatusIndicator = ({ state }: StatusIndicatorProps) => {
       default:
         return {
           icon: Shield,
-          text: 'Awaiting Connection',
-          color: 'text-muted-foreground',
-          bgColor: 'bg-muted',
-          borderColor: 'border-muted',
+          text: isConnected ? 'Connected — Waiting for status...' : 'Awaiting Connection',
+          color: isConnected ? 'text-status-active' : 'text-muted-foreground',
+          bgColor: isConnected ? 'bg-status-active/10' : 'bg-muted',
+          borderColor: isConnected ? 'border-status-active' : 'border-muted',
           pulse: false,
         };
     }
