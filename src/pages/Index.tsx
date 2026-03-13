@@ -41,6 +41,19 @@ const Index = () => {
         {/* Status Display */}
         <StatusIndicator state={currentState} isConnected={isConnected} />
 
+        {/* Stop Alarm — full-width, prominent when alarm is active */}
+        {isPlaying && (
+          <Button
+            onClick={stopAlarm}
+            variant="destructive"
+            size="lg"
+            className="w-full gap-2 animate-pulse text-base font-bold py-6"
+          >
+            <BellOff className="h-6 w-6" />
+            Stop Alarm
+          </Button>
+        )}
+
         {/* Connection Controls */}
         <div className="flex gap-4">
           {!isConnected ? (
@@ -62,18 +75,6 @@ const Index = () => {
             >
               <BluetoothOff className="h-5 w-5" />
               Disconnect
-            </Button>
-          )}
-
-          {isPlaying && (
-            <Button
-              onClick={stopAlarm}
-              variant="destructive"
-              className="flex-1 gap-2"
-              size="lg"
-            >
-              <BellOff className="h-5 w-5" />
-              Stop Alarm
             </Button>
           )}
         </div>
