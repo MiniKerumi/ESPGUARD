@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Bluetooth, BluetoothOff, BellOff } from "lucide-react";
+import { Bluetooth, BluetoothOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusIndicator } from "@/components/StatusIndicator";
@@ -11,7 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
   const { isConnected, currentState, logs, isScanning, sensorStatus, connect, disconnect } = useBluetooth();
-  const { isPlaying, triggerAlarm, stopAlarm, requestPermissions } = useAlarm();
+  const { triggerAlarm, stopAlarm, requestPermissions } = useAlarm();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -23,11 +23,14 @@ const Index = () => {
       triggerAlarm();
       toast({
         title: "⚠ ALARM!",
-        description: "Motion detected by IR sensor",
+        description: "Object detected — scan NFC card to dismiss",
         variant: "destructive",
       });
+    } else {
+      // Auto-reset: stop alarm when state leaves ALARM
+      stopAlarm();
     }
-  }, [currentState, triggerAlarm, toast]);
+  }, [currentState, triggerAlarm, stopAlarm, toast]);
 
   return (
     <div className="min-h-screen bg-background p-4">
@@ -40,19 +43,6 @@ const Index = () => {
 
         {/* Status Display */}
         <StatusIndicator state={currentState} isConnected={isConnected} />
-
-        {/* Stop Alarm — full-width, prominent when alarm is active */}
-        {isPlaying && (
-          <Button
-            onClick={stopAlarm}
-            variant="destructive"
-            size="lg"
-            className="w-full gap-2 animate-pulse text-base font-bold py-6"
-          >
-            <BellOff className="h-6 w-6" />
-            Stop Alarm
-          </Button>
-        )}
 
         {/* Connection Controls */}
         <div className="flex gap-4">
