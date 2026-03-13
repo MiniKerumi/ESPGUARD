@@ -1,15 +1,14 @@
-import { useState, useCallback, useRef } from 'react';
+import { useCallback, useRef } from 'react';
 import { Haptics } from '@capacitor/haptics';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
 export const useAlarm = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const isPlayingRef = useRef(false);
 
   const initializeAudio = useCallback(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio('/alarm.mp3');
-      // Loop audio so it keeps playing — don't auto-stop isPlaying on end
       audioRef.current.loop = true;
     }
   }, []);
@@ -23,10 +22,8 @@ export const useAlarm = () => {
   }, []);
 
   const triggerAlarm = useCallback(async () => {
-    if (isPlaying) return;
-
-    // Set alarm active immediately — button stays visible regardless of audio/haptic success
-    setIsPlaying(true);
+    if (isPlayingRef.current) return;
+    isPlayingRef.current = true;
 
     // Vibrate (best-effort)
     Haptics.vibrate({ duration: 1000 }).catch(() => {});
@@ -41,7 +38,7 @@ export const useAlarm = () => {
       }]
     }).catch(() => {});
 
-    // Play alarm sound (best-effort — failure does NOT hide the button)
+    // Play alarm sound (best-effort)
     initializeAudio();
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -49,10 +46,10 @@ export const useAlarm = () => {
         console.warn('Audio autoplay blocked:', err);
       });
     }
-  }, [isPlaying, initializeAudio]);
+  }, [initializeAudio]);
 
   const stopAlarm = useCallback(async () => {
-    setIsPlaying(false);
+    isPlayingRef.current = false;
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
@@ -61,7 +58,6 @@ export const useAlarm = () => {
   }, []);
 
   return {
-    isPlaying,
     triggerAlarm,
     stopAlarm,
     requestPermissions

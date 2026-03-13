@@ -13,7 +13,7 @@ export const StatusIndicator = ({ state, isConnected }: StatusIndicatorProps) =>
       case 'NORMAL':
         return {
           icon: Shield,
-          text: 'System Normal',
+          text: 'Monitoring Active',
           color: 'text-status-active',
           bgColor: 'bg-status-active/10',
           borderColor: 'border-status-active',
@@ -71,7 +71,7 @@ export const StatusIndicator = ({ state, isConnected }: StatusIndicatorProps) =>
         )}
         {state === 'ALARM' && (
           <p className="text-sm text-status-motion/80 animate-pulse">
-            IR sensor triggered · Immediate attention required
+            Object detected by HC-SR04 · Scan NFC card to dismiss
           </p>
         )}
       </div>
