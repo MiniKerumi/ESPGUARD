@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { Haptics, ImpactStyle } from '@capacitor/haptics';
+import { Haptics } from '@capacitor/haptics';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
 export const useAlarm = () => {
@@ -9,9 +9,8 @@ export const useAlarm = () => {
   const initializeAudio = useCallback(() => {
     if (!audioRef.current) {
       audioRef.current = new Audio('/alarm.mp3');
-      audioRef.current.addEventListener('ended', () => {
-        setIsPlaying(false);
-      });
+      // Loop audio so it keeps playing — don't auto-stop isPlaying on end
+      audioRef.current.loop = true;
     }
   }, []);
 
@@ -26,50 +25,39 @@ export const useAlarm = () => {
   const triggerAlarm = useCallback(async () => {
     if (isPlaying) return;
 
-    try {
-      setIsPlaying(true);
+    // Set alarm active immediately — button stays visible regardless of audio/haptic success
+    setIsPlaying(true);
 
-      // Vibrate
-      await Haptics.vibrate({ duration: 1000 });
+    // Vibrate (best-effort)
+    Haptics.vibrate({ duration: 1000 }).catch(() => {});
 
-      // Show notification
-      await LocalNotifications.schedule({
-        notifications: [{
-          title: 'ESP32 Security Alert',
-          body: 'Motion Detected!',
-          id: 1,
-          schedule: { at: new Date(Date.now() + 100) }
-        }]
+    // Show notification (best-effort)
+    LocalNotifications.schedule({
+      notifications: [{
+        title: 'ESP32 Security Alert',
+        body: 'Object Detected!',
+        id: 1,
+        schedule: { at: new Date(Date.now() + 100) }
+      }]
+    }).catch(() => {});
+
+    // Play alarm sound (best-effort — failure does NOT hide the button)
+    initializeAudio();
+    if (audioRef.current) {
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(err => {
+        console.warn('Audio autoplay blocked:', err);
       });
-
-      // Play alarm sound
-      initializeAudio();
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(err => {
-          console.error('Failed to play audio:', err);
-          setIsPlaying(false);
-        });
-      }
-    } catch (error) {
-      console.error('Alarm error:', error);
-      setIsPlaying(false);
     }
   }, [isPlaying, initializeAudio]);
 
   const stopAlarm = useCallback(async () => {
-    try {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
-      }
-      setIsPlaying(false);
-
-      // Cancel any pending notifications
-      await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
-    } catch (error) {
-      console.error('Stop alarm error:', error);
+    setIsPlaying(false);
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
     }
+    LocalNotifications.cancel({ notifications: [{ id: 1 }] }).catch(() => {});
   }, []);
 
   return {
