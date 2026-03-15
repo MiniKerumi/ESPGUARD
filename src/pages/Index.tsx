@@ -33,8 +33,8 @@ const Index = () => {
   }, [currentState, triggerAlarm, stopAlarm, toast]);
 
   return (
-    <div className="min-h-screen bg-background p-4">
-      <div className="mx-auto max-w-2xl space-y-6">
+    <div className="min-h-screen bg-background p-4 pb-8">
+      <div className="mx-auto max-w-2xl space-y-4">
         {/* Header */}
         <div className="text-center">
           <h1 className="mb-2 text-4xl font-bold">ESP32 Security Monitor</h1>
