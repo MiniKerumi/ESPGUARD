@@ -5,6 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,6 +15,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -33,9 +38,13 @@ jobs:
 
       - name: Build web assets
         run: npm run build
+        env:
+          CAP_DEV: 'false'
 
       - name: Capacitor sync Android
         run: npx cap sync android
+        env:
+          CAP_DEV: 'false'
 
       - name: Make Gradle executable
         run: chmod +x android/gradlew
@@ -45,9 +54,38 @@ jobs:
           cd android
           ./gradlew assembleDebug --no-daemon
 
+      - name: Get short SHA
+        id: sha
+        run: echo "short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ESP32-SecurityMonitor-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           retention-days: 30
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ steps.sha.outputs.short }}
+          name: "ESP32 Security Monitor — build ${{ steps.sha.outputs.short }}"
+          body: |
+            ## 📱 ESP32 Security Monitor
+
+            Debug APK built automatically from commit `${{ steps.sha.outputs.short }}`.
+
+            ### Install on Android
+            1. Download `app-debug.apk` below
+            2. On your phone go to **Settings → Install unknown apps** and allow your browser/file manager
+            3. Open the downloaded file and tap **Install**
+
+            ### Features
+            - 🔵 Bluetooth LE connection to ESP32
+            - 🟢 NORMAL — Monitoring Active
+            - 🟡 MAINT — Maintenance Mode
+            - 🔴 ALARM — Full alert with vibration & sound
+            - 🔕 NFC hardware-controlled alarm reset
+          files: android/app/build/outputs/apk/debug/app-debug.apk
+          draft: false
+          prerelease: false
