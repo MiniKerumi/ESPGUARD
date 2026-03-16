@@ -41,8 +41,10 @@ jobs:
         env:
           CAP_DEV: 'false'
 
-      - name: Capacitor sync Android
-        run: npx cap sync android
+      - name: Capacitor add & sync Android
+        run: |
+          npx cap add android || true
+          npx cap sync android
         env:
           CAP_DEV: 'false'
 
