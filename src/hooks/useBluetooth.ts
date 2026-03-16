@@ -27,6 +27,7 @@ export const useBluetooth = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [sensorStatus, setSensorStatus] = useState<SensorStatus>({ nfcActive: false, irActive: false });
+  const [lastEvent, setLastEvent] = useState<SystemEvent>(null);
   const previousStateRef = useRef<SystemState>('UNKNOWN');
 
   const addLog = useCallback((message: string, state?: SystemState, severity: 'info' | 'warning' | 'critical' = 'info') => {
