@@ -32,6 +32,16 @@ const Index = () => {
     }
   }, [currentState, triggerAlarm, stopAlarm, toast]);
 
+  useEffect(() => {
+    if (lastEvent === 'UNAUTH') {
+      toast({
+        title: "🚫 Unauthorized Tag",
+        description: "An unrecognized NFC card was scanned — access denied",
+        variant: "destructive",
+      });
+    }
+  }, [lastEvent, toast]);
+
   return (
     <div className="min-h-screen bg-background p-4 pb-8">
       <div className="mx-auto max-w-2xl space-y-4">
