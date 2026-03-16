@@ -44,6 +44,17 @@ export const useBluetooth = () => {
     const stateText = decoder.decode(value).trim();
     const prevState = previousStateRef.current;
 
+    if (stateText === 'UNAUTH') {
+      setSensorStatus(prev => ({ ...prev, nfcActive: true }));
+      addLog('🚫 NFC: Unauthorized tag scanned — access denied', undefined, 'critical');
+      setLastEvent('UNAUTH');
+      setTimeout(() => {
+        setSensorStatus(prev => ({ ...prev, nfcActive: false }));
+        setLastEvent(null);
+      }, 3000);
+      return;
+    }
+
     if (stateText === 'NORMAL' || stateText === 'MAINT' || stateText === 'ALARM') {
       const newState = stateText as SystemState;
       
@@ -67,7 +78,6 @@ export const useBluetooth = () => {
         setSensorStatus(prev => ({ ...prev, irActive: false }));
       }
 
-      // Only log generic state if no specific log was added above
       if (newState === prevState) {
         // Same state, no log needed
       } else if (newState === 'NORMAL' && prevState === 'ALARM') {
