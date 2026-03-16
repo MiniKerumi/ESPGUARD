@@ -10,7 +10,7 @@ import { useAlarm } from "@/hooks/useAlarm";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { isConnected, currentState, logs, isScanning, sensorStatus, connect, disconnect } = useBluetooth();
+  const { isConnected, currentState, logs, isScanning, sensorStatus, lastEvent, connect, disconnect } = useBluetooth();
   const { triggerAlarm, stopAlarm, requestPermissions } = useAlarm();
   const { toast } = useToast();
 
@@ -31,6 +31,16 @@ const Index = () => {
       stopAlarm();
     }
   }, [currentState, triggerAlarm, stopAlarm, toast]);
+
+  useEffect(() => {
+    if (lastEvent === 'UNAUTH') {
+      toast({
+        title: "🚫 Unauthorized Tag",
+        description: "An unrecognized NFC card was scanned — access denied",
+        variant: "destructive",
+      });
+    }
+  }, [lastEvent, toast]);
 
   return (
     <div className="min-h-screen bg-background p-4 pb-8">

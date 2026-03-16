@@ -6,6 +6,7 @@ const SERVICE_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
 const CHAR_UUID = '6E400002-B5A3-F393-E0A9-E50E24DCCA9E';
 
 export type SystemState = 'NORMAL' | 'MAINT' | 'ALARM' | 'UNKNOWN';
+export type SystemEvent = 'UNAUTH' | null;
 
 export interface LogEntry {
   timestamp: Date;
@@ -26,6 +27,7 @@ export const useBluetooth = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isScanning, setIsScanning] = useState(false);
   const [sensorStatus, setSensorStatus] = useState<SensorStatus>({ nfcActive: false, irActive: false });
+  const [lastEvent, setLastEvent] = useState<SystemEvent>(null);
   const previousStateRef = useRef<SystemState>('UNKNOWN');
 
   const addLog = useCallback((message: string, state?: SystemState, severity: 'info' | 'warning' | 'critical' = 'info') => {
@@ -41,6 +43,17 @@ export const useBluetooth = () => {
     const decoder = new TextDecoder();
     const stateText = decoder.decode(value).trim();
     const prevState = previousStateRef.current;
+
+    if (stateText === 'UNAUTH') {
+      setSensorStatus(prev => ({ ...prev, nfcActive: true }));
+      addLog('🚫 NFC: Unauthorized tag scanned — access denied', undefined, 'critical');
+      setLastEvent('UNAUTH');
+      setTimeout(() => {
+        setSensorStatus(prev => ({ ...prev, nfcActive: false }));
+        setLastEvent(null);
+      }, 3000);
+      return;
+    }
 
     if (stateText === 'NORMAL' || stateText === 'MAINT' || stateText === 'ALARM') {
       const newState = stateText as SystemState;
@@ -65,7 +78,6 @@ export const useBluetooth = () => {
         setSensorStatus(prev => ({ ...prev, irActive: false }));
       }
 
-      // Only log generic state if no specific log was added above
       if (newState === prevState) {
         // Same state, no log needed
       } else if (newState === 'NORMAL' && prevState === 'ALARM') {
@@ -142,6 +154,7 @@ export const useBluetooth = () => {
     logs,
     isScanning,
     sensorStatus,
+    lastEvent,
     connect,
     disconnect,
   };
