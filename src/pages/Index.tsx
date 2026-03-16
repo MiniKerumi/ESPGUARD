@@ -10,7 +10,7 @@ import { useAlarm } from "@/hooks/useAlarm";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { isConnected, currentState, logs, isScanning, sensorStatus, connect, disconnect } = useBluetooth();
+  const { isConnected, currentState, logs, isScanning, sensorStatus, lastEvent, connect, disconnect } = useBluetooth();
   const { triggerAlarm, stopAlarm, requestPermissions } = useAlarm();
   const { toast } = useToast();
 
