@@ -154,6 +154,7 @@ export const useBluetooth = () => {
     logs,
     isScanning,
     sensorStatus,
+    lastEvent,
     connect,
     disconnect,
   };
