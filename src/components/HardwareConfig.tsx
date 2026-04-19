@@ -13,13 +13,13 @@ interface HardwareConfigProps {
 }
 
 const pinData = [
-  { component: "MFRC522 (NFC)", pin: "SDA/SS", gpio: "GPIO 5" },
-  { component: "MFRC522 (NFC)", pin: "RST", gpio: "GPIO 6" },
-  { component: "MFRC522 (NFC)", pin: "SCK", gpio: "GPIO 2" },
-  { component: "MFRC522 (NFC)", pin: "MOSI", gpio: "GPIO 3" },
-  { component: "MFRC522 (NFC)", pin: "MISO", gpio: "GPIO 4" },
-  { component: "HC-SR04 (Ultrasonic)", pin: "TRIG", gpio: "GPIO 8" },
-  { component: "HC-SR04 (Ultrasonic)", pin: "ECHO", gpio: "GPIO 9" },
+  { component: "MFRC522 (NFC)", pin: "SS", gpio: "GPIO 18" },
+  { component: "MFRC522 (NFC)", pin: "MOSI", gpio: "GPIO 19" },
+  { component: "MFRC522 (NFC)", pin: "SCK", gpio: "GPIO 20" },
+  { component: "MFRC522 (NFC)", pin: "MISO", gpio: "GPIO 14" },
+  { component: "MFRC522 (NFC)", pin: "RST", gpio: "GPIO 15" },
+  { component: "HC-SR04 (Ultrasonic)", pin: "TRIG", gpio: "GPIO 3" },
+  { component: "HC-SR04 (Ultrasonic)", pin: "ECHO", gpio: "GPIO 4" },
 ];
 
 export const HardwareConfig = ({ sensorStatus, isConnected }: HardwareConfigProps) => {
