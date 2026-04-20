@@ -21,9 +21,9 @@ const Index = () => {
   useEffect(() => {
     if (currentState === 'ALARM') {
       triggerAlarm();
-      toast({
+toast({
         title: "⚠ ALARM!",
-        description: "Object detected — scan NFC card to dismiss",
+        description: "Motion detected — scan NFC card to dismiss",
         variant: "destructive",
       });
     } else {
@@ -47,7 +47,7 @@ const Index = () => {
       <div className="mx-auto max-w-2xl space-y-4">
         {/* Header */}
         <div className="text-center">
-          <h1 className="mb-2 text-4xl font-bold">ESP32 Security Monitor</h1>
+<h1 className="mb-2 text-4xl font-bold">ESPGUARD</h1>
           <p className="text-muted-foreground">Real-time motion detection system</p>
         </div>
 

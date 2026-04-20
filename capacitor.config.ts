@@ -4,7 +4,7 @@ const isDevMode = process.env.CAP_DEV !== 'false';
 
 const config: CapacitorConfig = {
   appId: 'com.espguard.app',
-  appName: 'ESP32 Security Monitor',
+  appName: 'ESPGUARD',
   webDir: 'dist',
   // Live-reload server — only active during local development, stripped for APK builds
   ...(isDevMode && {
