@@ -31,7 +31,7 @@ export const StatusIndicator = ({ state, isConnected }: StatusIndicatorProps) =>
       case 'ALARM':
         return {
           icon: AlertTriangle,
-          text: 'ALARM — Object Detected!',
+          text: 'ALARM — Motion Detected!',
           color: 'text-status-motion',
           bgColor: 'bg-status-motion/20',
           borderColor: 'border-status-motion',
@@ -71,7 +71,7 @@ export const StatusIndicator = ({ state, isConnected }: StatusIndicatorProps) =>
         )}
         {state === 'ALARM' && (
           <p className="text-sm text-status-motion/80 animate-pulse">
-            Object detected by HC-SR04 · Scan NFC card to dismiss
+            Motion detected by HC-SR04 · Scan NFC card to dismiss
           </p>
         )}
       </div>

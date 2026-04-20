@@ -31,8 +31,8 @@ export const useAlarm = () => {
     // Show notification (best-effort)
     LocalNotifications.schedule({
       notifications: [{
-        title: 'ESP32 Security Alert',
-        body: 'Object Detected!',
+title: 'ESPGUARD Alert',
+        body: 'Motion Detected!',
         id: 1,
         schedule: { at: new Date(Date.now() + 100) }
       }]
