@@ -40,7 +40,7 @@ export const StatusIndicator = ({ state, isConnected }: StatusIndicatorProps) =>
       default:
         return {
           icon: Shield,
-          text: isConnected ? 'Connected — Waiting for status...' : 'Awaiting Connection',
+          text: isConnected ? 'Connected — Waiting for status...' : 'Disconnected',
           color: isConnected ? 'text-status-active' : 'text-muted-foreground',
           bgColor: isConnected ? 'bg-status-active/10' : 'bg-muted',
           borderColor: isConnected ? 'border-status-active' : 'border-muted',

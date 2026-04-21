@@ -72,7 +72,7 @@ export const useBluetooth = () => {
       if (newState === 'ALARM') {
         setSensorStatus(prev => ({ ...prev, irActive: true }));
         if (prevState !== 'ALARM') {
-          addLog('⚠ ALARM: Motion detected by IR sensor!', 'ALARM', 'critical');
+          addLog('⚠ ALARM: Motion detected by ultrasonic sensor!', 'ALARM', 'critical');
         }
       } else {
         setSensorStatus(prev => ({ ...prev, irActive: false }));
