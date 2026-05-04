@@ -6,12 +6,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusIndicator } from "@/components/StatusIndicator";
 import { ActivityLog } from "@/components/ActivityLog";
 import { HardwareConfig } from "@/components/HardwareConfig";
-import { useBluetooth } from "@/hooks/useBluetooth";
+import { useBluetoothContext } from "@/contexts/BluetoothContext";
 import { useAlarm } from "@/hooks/useAlarm";
 import { useToast } from "@/hooks/use-toast";
 
 const Index = () => {
-  const { isConnected, currentState, logs, isScanning, sensorStatus, lastEvent, connect, disconnect } = useBluetooth();
+  const { isConnected, currentState, logs, isScanning, sensorStatus, lastEvent, connect, disconnect } = useBluetoothContext();
   const { triggerAlarm, stopAlarm, requestPermissions } = useAlarm();
   const { toast } = useToast();
 
