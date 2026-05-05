@@ -16,7 +16,26 @@ export const NfcPanel = () => {
   const [uid, setUid] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const { toast } = useToast();
+  const { isConnected, sendCommand } = useBluetoothContext();
+
+  const syncToDevice = async () => {
+    if (!isConnected) {
+      toast({ title: 'Not connected', description: 'Connect to ESPGUARD device first', variant: 'destructive' });
+      return;
+    }
+    setSyncing(true);
+    try {
+      const active = rows.filter(r => r.status === 'ACTIVE').map(r => r.uid.replace(/[:\s]/g, '').toUpperCase());
+      await sendCommand(`SYNC:${active.join(',')}`);
+      toast({ title: 'Synced', description: `${active.length} authorized UID(s) sent to device` });
+    } catch (e) {
+      toast({ title: 'Sync failed', description: e instanceof Error ? e.message : 'Error', variant: 'destructive' });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const load = async () => {
     const { data, error } = await supabase
