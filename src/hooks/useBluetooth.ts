@@ -1,5 +1,12 @@
 import { useState, useCallback, useRef } from 'react';
 import { BleClient } from '@capacitor-community/bluetooth-le';
+import { supabase } from '@/lib/supabase';
+
+const logToSupabase = (event_type: string, uid: string | null = null, device: string | null = 'ESPGUARD-Server') => {
+  supabase.from('espguard_logs').insert({ event_type, uid, device, timestamp: new Date().toISOString() }).then(({ error }) => {
+    if (error) console.error('Supabase log insert failed:', error.message);
+  });
+};
 
 const TARGET_NAME = 'ESPGUARD-Server';
 const SERVICE_UUID = '6E400001-B5A3-F393-E0A9-E50E24DCCA9E';
@@ -48,6 +55,7 @@ export const useBluetooth = () => {
       setSensorStatus(prev => ({ ...prev, nfcActive: true }));
       addLog('🚫 NFC: Unauthorized tag scanned — access denied', undefined, 'critical');
       setLastEvent('UNAUTH');
+      logToSupabase('UNAUTH');
       setTimeout(() => {
         setSensorStatus(prev => ({ ...prev, nfcActive: false }));
         setLastEvent(null);
@@ -62,10 +70,12 @@ export const useBluetooth = () => {
       if (newState === 'MAINT' && prevState !== 'MAINT') {
         setSensorStatus(prev => ({ ...prev, nfcActive: true }));
         addLog('NFC: Authorized tag scanned → Maintenance ON', 'MAINT', 'warning');
+        logToSupabase('ACCESS');
         setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
       } else if (prevState === 'MAINT' && newState === 'NORMAL') {
         setSensorStatus(prev => ({ ...prev, nfcActive: true }));
         addLog('NFC: Authorized tag scanned → Maintenance OFF', 'NORMAL', 'info');
+        logToSupabase('ACCESS');
         setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
       }
 
@@ -73,6 +83,7 @@ export const useBluetooth = () => {
         setSensorStatus(prev => ({ ...prev, irActive: true }));
         if (prevState !== 'ALARM') {
           addLog('⚠ ALARM: Motion detected by ultrasonic sensor!', 'ALARM', 'critical');
+          logToSupabase('ALARM');
         }
       } else {
         setSensorStatus(prev => ({ ...prev, irActive: false }));
