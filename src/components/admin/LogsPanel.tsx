@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Download } from 'lucide-react';
 import { supabase, EspguardLog } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
