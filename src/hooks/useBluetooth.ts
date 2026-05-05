@@ -163,6 +163,14 @@ export const useBluetooth = () => {
     }
   }, [deviceAddress, addLog]);
 
+  const sendCommand = useCallback(async (cmd: string) => {
+    if (!deviceAddress) throw new Error('Not connected to device');
+    const data = new TextEncoder().encode(cmd);
+    const dv = new DataView(data.buffer);
+    await BleClient.write(deviceAddress, SERVICE_UUID, CHAR_UUID, dv);
+    addLog(`→ Sent: ${cmd.length > 60 ? cmd.slice(0, 60) + '…' : cmd}`, undefined, 'info');
+  }, [deviceAddress, addLog]);
+
   return {
     isConnected,
     currentState,
@@ -172,5 +180,6 @@ export const useBluetooth = () => {
     lastEvent,
     connect,
     disconnect,
+    sendCommand,
   };
 };
