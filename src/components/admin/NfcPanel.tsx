@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Shield, ShieldOff } from 'lucide-react';
+import { Plus, Shield, ShieldOff, RefreshCw } from 'lucide-react';
 import { supabase, AuthorizedNfc } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useBluetoothContext } from '@/contexts/BluetoothContext';
 
 export const NfcPanel = () => {
   const [rows, setRows] = useState<AuthorizedNfc[]>([]);
