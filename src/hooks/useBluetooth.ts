@@ -48,14 +48,18 @@ export const useBluetooth = () => {
 
   const handleNotification = useCallback((value: DataView) => {
     const decoder = new TextDecoder();
-    const stateText = decoder.decode(value).trim();
+    const raw = decoder.decode(value).trim();
     const prevState = previousStateRef.current;
+
+    // Support "TYPE:UID" format from firmware (e.g. "UNAUTH:04A1B2C3", "MAINT:04A1B2C3")
+    const [stateText, uidPart] = raw.split(':');
+    const uid = uidPart ? uidPart.trim().toUpperCase() : null;
 
     if (stateText === 'UNAUTH') {
       setSensorStatus(prev => ({ ...prev, nfcActive: true }));
-      addLog('🚫 NFC: Unauthorized tag scanned — access denied', undefined, 'critical');
+      addLog(`🚫 NFC: Unauthorized tag${uid ? ` (${uid})` : ''} — access denied`, undefined, 'critical');
       setLastEvent('UNAUTH');
-      logToSupabase('UNAUTH');
+      logToSupabase('UNAUTH', uid);
       setTimeout(() => {
         setSensorStatus(prev => ({ ...prev, nfcActive: false }));
         setLastEvent(null);
@@ -65,17 +69,17 @@ export const useBluetooth = () => {
 
     if (stateText === 'NORMAL' || stateText === 'MAINT' || stateText === 'ALARM') {
       const newState = stateText as SystemState;
-      
+
       // Infer sensor activity from state transitions
       if (newState === 'MAINT' && prevState !== 'MAINT') {
         setSensorStatus(prev => ({ ...prev, nfcActive: true }));
-        addLog('NFC: Authorized tag scanned → Maintenance ON', 'MAINT', 'warning');
-        logToSupabase('ACCESS');
+        addLog(`NFC: Authorized tag${uid ? ` (${uid})` : ''} → Maintenance ON`, 'MAINT', 'warning');
+        logToSupabase('ACCESS', uid);
         setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
       } else if (prevState === 'MAINT' && newState === 'NORMAL') {
         setSensorStatus(prev => ({ ...prev, nfcActive: true }));
-        addLog('NFC: Authorized tag scanned → Maintenance OFF', 'NORMAL', 'info');
-        logToSupabase('ACCESS');
+        addLog(`NFC: Authorized tag${uid ? ` (${uid})` : ''} → Maintenance OFF`, 'NORMAL', 'info');
+        logToSupabase('ACCESS', uid);
         setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
       }
 
