@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Plus, Shield, ShieldOff } from 'lucide-react';
+import { Plus, Shield, ShieldOff, RefreshCw } from 'lucide-react';
 import { supabase, AuthorizedNfc } from '@/lib/supabase';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
+import { useBluetoothContext } from '@/contexts/BluetoothContext';
 
 export const NfcPanel = () => {
   const [rows, setRows] = useState<AuthorizedNfc[]>([]);
@@ -15,7 +16,26 @@ export const NfcPanel = () => {
   const [uid, setUid] = useState('');
   const [name, setName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [syncing, setSyncing] = useState(false);
   const { toast } = useToast();
+  const { isConnected, sendCommand } = useBluetoothContext();
+
+  const syncToDevice = async () => {
+    if (!isConnected) {
+      toast({ title: 'Not connected', description: 'Connect to ESPGUARD device first', variant: 'destructive' });
+      return;
+    }
+    setSyncing(true);
+    try {
+      const active = rows.filter(r => r.status === 'ACTIVE').map(r => r.uid.replace(/[:\s]/g, '').toUpperCase());
+      await sendCommand(`SYNC:${active.join(',')}`);
+      toast({ title: 'Synced', description: `${active.length} authorized UID(s) sent to device` });
+    } catch (e) {
+      toast({ title: 'Sync failed', description: e instanceof Error ? e.message : 'Error', variant: 'destructive' });
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   const load = async () => {
     const { data, error } = await supabase
@@ -70,14 +90,18 @@ export const NfcPanel = () => {
 
   return (
     <div className="rounded-xl border border-border bg-card p-4">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-2">
         <h3 className="text-lg font-semibold">Authorized NFC</h3>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>
-            <Button size="sm" className="gap-2">
-              <Plus className="h-4 w-4" /> Add NFC
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" className="gap-2" onClick={syncToDevice} disabled={syncing || !isConnected}>
+            <RefreshCw className={`h-4 w-4 ${syncing ? 'animate-spin' : ''}`} /> Sync to Device
+          </Button>
+          <Dialog open={open} onOpenChange={setOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" className="gap-2">
+                <Plus className="h-4 w-4" /> Add NFC
+              </Button>
+            </DialogTrigger>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Add Authorized NFC</DialogTitle>
@@ -97,6 +121,7 @@ export const NfcPanel = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <Table>
