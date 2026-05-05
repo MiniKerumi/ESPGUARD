@@ -121,6 +121,7 @@ export const NfcPanel = () => {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <Table>
