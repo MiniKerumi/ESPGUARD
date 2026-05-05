@@ -70,10 +70,12 @@ export const useBluetooth = () => {
       if (newState === 'MAINT' && prevState !== 'MAINT') {
         setSensorStatus(prev => ({ ...prev, nfcActive: true }));
         addLog('NFC: Authorized tag scanned → Maintenance ON', 'MAINT', 'warning');
+        logToSupabase('ACCESS');
         setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
       } else if (prevState === 'MAINT' && newState === 'NORMAL') {
         setSensorStatus(prev => ({ ...prev, nfcActive: true }));
         addLog('NFC: Authorized tag scanned → Maintenance OFF', 'NORMAL', 'info');
+        logToSupabase('ACCESS');
         setTimeout(() => setSensorStatus(prev => ({ ...prev, nfcActive: false })), 3000);
       }
 
@@ -81,6 +83,7 @@ export const useBluetooth = () => {
         setSensorStatus(prev => ({ ...prev, irActive: true }));
         if (prevState !== 'ALARM') {
           addLog('⚠ ALARM: Motion detected by ultrasonic sensor!', 'ALARM', 'critical');
+          logToSupabase('ALARM');
         }
       } else {
         setSensorStatus(prev => ({ ...prev, irActive: false }));
