@@ -55,6 +55,7 @@ export const useBluetooth = () => {
       setSensorStatus(prev => ({ ...prev, nfcActive: true }));
       addLog('🚫 NFC: Unauthorized tag scanned — access denied', undefined, 'critical');
       setLastEvent('UNAUTH');
+      logToSupabase('UNAUTH');
       setTimeout(() => {
         setSensorStatus(prev => ({ ...prev, nfcActive: false }));
         setLastEvent(null);
