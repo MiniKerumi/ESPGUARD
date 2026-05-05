@@ -62,11 +62,29 @@ export const LogsPanel = ({ onCounts }: LogsPanelProps) => {
 
   const filters: Filter[] = ['ALL', 'ALARM', 'UNAUTH', 'ACCESS'];
 
+  const exportCsv = () => {
+    const header = ['timestamp', 'event_type', 'uid', 'device'];
+    const rows = filtered.map(l => [
+      new Date(l.timestamp).toISOString(),
+      l.event_type,
+      l.uid || '',
+      l.device || '',
+    ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(','));
+    const csv = [header.join(','), ...rows].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `espguard-logs-${filter.toLowerCase()}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-')}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-lg font-semibold">Logs</h3>
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap items-center gap-1">
           {filters.map((f) => (
             <Button
               key={f}
@@ -78,6 +96,9 @@ export const LogsPanel = ({ onCounts }: LogsPanelProps) => {
               {f}
             </Button>
           ))}
+          <Button size="sm" variant="outline" onClick={exportCsv} className="ml-2 h-7 gap-1 px-3 text-xs">
+            <Download className="h-3 w-3" /> Export CSV
+          </Button>
         </div>
       </div>
       <ScrollArea className="h-[420px]">
