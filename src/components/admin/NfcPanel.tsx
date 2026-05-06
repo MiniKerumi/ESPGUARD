@@ -28,7 +28,7 @@ export const NfcPanel = () => {
     setSyncing(true);
     try {
       const active = rows.filter(r => r.status === 'ACTIVE').map(r => r.uid.replace(/[:\s]/g, '').toUpperCase());
-      await sendCommand(`SYNC:${active.join(',')}`);
+      await sendCommand(`SET_UID:${active.join(',')}`);
       toast({ title: 'Synced', description: `${active.length} authorized UID(s) sent to device` });
     } catch (e) {
       toast({ title: 'Sync failed', description: e instanceof Error ? e.message : 'Error', variant: 'destructive' });
