@@ -60,6 +60,16 @@ export const NfcPanel = () => {
     };
   }, []);
 
+  // Auto-sync whitelist to device whenever rows change AND device is connected
+  useEffect(() => {
+    if (!isConnected || rows.length === 0) return;
+    const t = setTimeout(() => {
+      const active = rows.filter(r => r.status === 'ACTIVE').map(r => r.uid.replace(/[:\s]/g, '').toUpperCase());
+      sendCommand(`SET_UID:${active.join(',')}`).catch(() => {});
+    }, 800);
+    return () => clearTimeout(t);
+  }, [rows, isConnected, sendCommand]);
+
   const addNfc = async () => {
     if (!uid.trim() || !name.trim()) return;
     setLoading(true);
