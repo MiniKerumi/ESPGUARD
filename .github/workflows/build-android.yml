@@ -48,6 +48,15 @@ jobs:
         env:
           CAP_DEV: 'false'
 
+      - name: Ensure Android permissions
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          for PERM in BLUETOOTH_SCAN BLUETOOTH_CONNECT BLUETOOTH_ADVERTISE ACCESS_FINE_LOCATION ACCESS_NETWORK_STATE INTERNET; do
+            grep -q "android.permission.$PERM" "$MANIFEST" || \
+              sed -i "s|<application|<uses-permission android:name=\"android.permission.$PERM\"/>\n    <application|" "$MANIFEST"
+          done
+          cat "$MANIFEST"
+
       - name: Make Gradle executable
         run: chmod +x android/gradlew
 
