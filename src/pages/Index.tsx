@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Bluetooth, BluetoothOff, Settings } from "lucide-react";
+import { Bluetooth, BluetoothOff, Settings, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StatusIndicator } from "@/components/StatusIndicator";
@@ -50,9 +50,14 @@ toast({
         <div className="text-center">
 <h1 className="mb-2 text-4xl font-bold">ESPGUARD</h1>
           <p className="text-muted-foreground">Real-time motion detection system</p>
-          <Button asChild variant="ghost" size="sm" className="mt-2 gap-2">
-            <Link to="/admin"><Settings className="h-4 w-4" /> Admin Dashboard</Link>
-          </Button>
+          <div className="mt-2 flex justify-center gap-2">
+            <Button asChild variant="ghost" size="sm" className="gap-2">
+              <Link to="/admin"><Settings className="h-4 w-4" /> Admin</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="gap-2">
+              <Link to="/manual"><BookOpen className="h-4 w-4" /> User Manual</Link>
+            </Button>
+          </div>
         </div>
 
         {/* Status Display */}
